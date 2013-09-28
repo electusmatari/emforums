@@ -468,7 +468,7 @@ if($mybb->input['action'] == "delete")
 }
 
 // Otherwise, show a listing of reputations for the given user.
-if(!$mybb->input['action'])
+if(!$mybb->input['action'] || $mybb->usergroup['cangivereputations'] != 1)
 {
 	if($mybb->usergroup['canviewprofiles'] == 0)
 	{
