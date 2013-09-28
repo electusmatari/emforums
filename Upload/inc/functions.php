@@ -1308,6 +1308,11 @@ function fetch_forum_permissions($fid, $gid, $groupperms)
 		$current_permissions["canonlyviewownthreads"] = 0;
 	}
 
+        if (is_moderator($fid))
+        {
+                $current_permissions['canonlyviewownthreads'] = 0;
+        }
+
 	if(count($current_permissions) == 0)
 	{
 		$current_permissions = $groupperms;
