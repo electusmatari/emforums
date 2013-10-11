@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: profile_fields.php 5748 2012-03-09 11:49:19Z Tomm $
+ * $Id$
  */
 
 // Disallow direct access to this file for security reasons
@@ -191,7 +191,7 @@ if($mybb->input['action'] == "edit")
 		
 		if(!$errors)
 		{
-			$profile_field = array(
+			$updated_profile_field = array(
 				"name" => $db->escape_string($mybb->input['name']),
 				"description" => $db->escape_string($mybb->input['description']),
 				"disporder" => intval($mybb->input['disporder']),
@@ -204,7 +204,7 @@ if($mybb->input['action'] == "edit")
 				"postnum" => intval($mybb->input['postnum'])
 			);
 			
-			$db->update_query("profilefields", $profile_field, "fid = '".intval($mybb->input['fid'])."'");
+			$db->update_query("profilefields", $updated_profile_field, "fid = '".intval($mybb->input['fid'])."'");
 			
 			$plugins->run_hooks("admin_config_profile_fields_edit_commit");
 			

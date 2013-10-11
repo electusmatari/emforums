@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_language.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 class MyLanguage
@@ -25,6 +25,13 @@ class MyLanguage
 	 * @var string
 	 */
 	public $language;
+
+	/**
+	 * The fallback language we are using.
+	 *
+	 * @var string
+	 */
+	public $fallback = 'english';
 
 	/**
 	 * Information about the current language.
@@ -70,7 +77,7 @@ class MyLanguage
 	 */
 	function set_language($language="english", $area="user")
 	{
-		global $mybb;
+		global $settings;
 		
 		$language = preg_replace("#[^a-z0-9\-_]#i", "", $language);
 
@@ -95,7 +102,7 @@ class MyLanguage
 		{
 			if(!is_dir($this->path."/".$language."/{$area}"))
 			{
-				if(!is_dir($this->path."/".$mybb->settings['cplanguage']."/{$area}"))
+				if(!is_dir($this->path."/".$settings['cplanguage']."/{$area}"))
 				{
 					if(!is_dir($this->path."/english/{$area}"))
 					{
@@ -108,10 +115,11 @@ class MyLanguage
 				}
 				else
 				{
-					$language = $mybb->settings['cplanguage'];
+					$language = $settings['cplanguage'];
 				}
 			}
 			$this->language = $language."/{$area}";
+			$this->fallback = $this->fallback."/{$area}";
 		}
 	}
 
@@ -126,19 +134,22 @@ class MyLanguage
 	{
 		// Assign language variables.
 		// Datahandlers are never in admin lang directory.
-		if($isdatahandler === true)
+		if($isdatahandler)
 		{
-			$this->language = str_replace('/admin', '', $this->language);
+			$lfile = $this->path.'/'.str_replace('/admin', '', $this->language).'/'.$section.'.lang.php';
 		}
-		$lfile = $this->path."/".$this->language."/".$section.".lang.php";
+		else
+		{
+			$lfile = $this->path.'/'.$this->language.'/'.$section.'.lang.php';
+		}
 		
 		if(file_exists($lfile))
 		{
 			require_once $lfile;
 		}
-		elseif(file_exists($this->path."/english/".$section.".lang.php"))
+		elseif(file_exists($this->path."/".$this->fallback."/".$section.".lang.php"))
 		{
-			require_once $this->path."/english/".$section.".lang.php";
+			require_once $this->path."/".$this->fallback."/".$section.".lang.php";
 		}
 		else
 		{
@@ -210,8 +221,19 @@ class MyLanguage
 	 */
 	function parse($contents)
 	{
-		$contents = preg_replace("#<lang:([a-zA-Z0-9_]+)>#e", "\$this->$1", $contents);
+		$contents = preg_replace_callback("#<lang:([a-zA-Z0-9_]+)>#", array($this, 'parse_replace'), $contents);
 		return $contents;
+	}
+
+	/**
+	 * Replace content with language variable.
+	 *
+	 * @param array Matches.
+	 * @return string Language variable.
+	 */
+	function parse_replace($matches)
+	{
+		return $this->$matches[1];
 	}
 }
 ?>

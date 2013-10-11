@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_feedgeneration.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 class FeedGenerator
@@ -190,9 +190,9 @@ class FeedGenerator
 	 */
 	function sanitize_content($content)
 	{
-		$content = preg_replace("#&[^\s]([^\#])(?![a-z1-4]{1,10};)#i", "&#x26;$1", $content);
+		$content = preg_replace("#&[^\s]([^\#])(?![a-z1-4]{1,10});#i", "&#x26;$1", $content);
 		$content = str_replace("]]>", "]]]]><![CDATA[>", $content);
-		
+
 		return $content;
 	}
 
