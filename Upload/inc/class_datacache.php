@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_datacache.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 class datacache
@@ -876,7 +876,7 @@ class datacache
 		}
 
 		// Do we have any mod tools to use in our forums?
-		$query = $db->simple_select("modtools", "forums, tid", "type = 't'", array("order_by" => "tid"));
+		$query = $db->simple_select("modtools", "forums, tid", '', array("order_by" => "tid"));
 
 		if($db->num_rows($query))
 		{

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: hourlycleanup.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id$
  */
 
 function task_hourlycleanup($task)
@@ -24,7 +24,7 @@ function task_hourlycleanup($task)
 	$db->delete_query("searchlog", "dateline < '{$cut}'");
 
 	// Delete old captcha images
-	$cut = TIME_NOW-(60*60*24*7);
+	$cut = TIME_NOW-(60*60*24);
 	$db->delete_query("captcha", "dateline < '{$cut}'");
 	
 	add_task_log($task, $lang->task_hourlycleanup_ran);

@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: global.lang.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
  
 $l['today'] = "Today";
@@ -47,6 +47,10 @@ $l['error_admin_session_expired'] = "Your administration session has expired";
 $l['error_invalid_ip'] = "Your IP address is not valid for this session";
 $l['error_mybb_admin_lockedout'] = "This account has been locked out";
 $l['error_mybb_admin_lockedout_message'] = "Your account is currently locked out after failing to login {1} times. You have been sent an email with instructions on how to unlock your account.";
+
+$l['error_invalid_username'] = "The username you entered is invalid.";
+$l['error_invalid_uid'] = "The user id you entered is invalid.";
+$l['error_invalid_token'] = "The activation code you entered is invalid.";
 
 $l['success_logged_out'] = "You have been logged out successfully.";
 $l['error_invalid_username_password'] = "The username and password combination you entered is invalid.";
@@ -274,7 +278,7 @@ Your administrator account at {2} has been locked after {3} failed login attempt
 
 To unlock your account, please go to the URL below in your web browser.
 
-{4}/{5}/index.php?action=unlock&token={6}
+{4}/{5}/index.php?action=unlock&uid={7}&token={6}
 
 If the above link does not work correctly, go to
 

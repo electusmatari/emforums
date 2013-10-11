@@ -10,9 +10,8 @@
  */
 
 /**
- * Upgrade Script: 1.2.3, 1.2.4, 1.2.5 or 1.2.6
+ * Upgrade Script: 1.6.10
  */
-
 
 $upgrade_detail = array(
 	"revert_all_templates" => 0,
@@ -22,6 +21,5 @@ $upgrade_detail = array(
 
 @set_time_limit(0);
 
-/* Nothing to do from 1.2.3 to 1.2.7 */
-
+/* Nothing to do for 1.6.10 */
 ?>

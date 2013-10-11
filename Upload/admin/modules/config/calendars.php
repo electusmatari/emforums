@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: calendars.php 5676 2011-11-29 12:10:19Z Tomm $
+ * $Id$
  */
 
 // Disallow direct access to this file for security reasons
@@ -295,7 +295,7 @@ if($mybb->input['action'] == "edit")
 
 		if(!$errors)
 		{
-			$calendar = array(
+			$updated_calendar = array(
 				"name" => $db->escape_string($mybb->input['name']),
 				"disporder" => intval($mybb->input['disporder']),
 				"startofweek" => intval($mybb->input['startofweek']),
@@ -309,7 +309,7 @@ if($mybb->input['action'] == "edit")
 				"allowsmilies" => $db->escape_string($mybb->input['allowsmilies'])
 			);
 			
-			$db->update_query("calendars", $calendar, "cid = '".intval($mybb->input['cid'])."'");
+			$db->update_query("calendars", $updated_calendar, "cid = '".intval($mybb->input['cid'])."'");
 			
 			$plugins->run_hooks("admin_config_calendars_edit_commit");
 			
