@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: promotions.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 function task_promotions($task)
@@ -67,6 +67,7 @@ function task_promotions($task)
 					break;
 				case "weeks":
 					$regdate = $promotion['registered']*60*60*24*7;
+					break;
 				case "months":
 					$regdate = $promotion['registered']*60*60*24*30;
 					break;

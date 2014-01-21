@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: smilies.php 5676 2011-11-29 12:10:19Z Tomm $
+ * $Id$
  */
 
 // Disallow direct access to this file for security reasons
@@ -482,6 +482,7 @@ if($mybb->input['action'] == "mass_edit")
 	{
 		foreach($mybb->input['name'] as $sid => $name)
 		{
+			$sid = intval($sid);
 			if($mybb->input['delete'][$sid] == 1)
 			{
 				$db->delete_query("smilies", "sid = '{$sid}'", 1);
