@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: tools_modlog.lang.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 
@@ -24,6 +24,7 @@ $l['forum'] = "Forum:";
 $l['thread'] = "Thread:";
 $l['post'] = "Post:";
 $l['user_info'] = "User:";
+$l['announcement'] = "Announcement:";
 
 $l['filter_moderator_logs'] = "Filter Moderator Logs";
 $l['forum_moderator'] = "Forum Moderator:";

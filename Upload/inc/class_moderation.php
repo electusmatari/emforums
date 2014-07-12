@@ -1335,6 +1335,7 @@ class Moderation
 			"replyto" => 0
 		);
 		$db->update_query("posts", $sqlarray, "pid IN ($pids_list)");
+		$db->update_query("reportedposts", array('tid' => $newtid), "pid IN ($pids_list)");
 
 		// Get posts being merged
 		while($post = $db->fetch_array($original_posts_query))
@@ -1530,7 +1531,7 @@ class Moderation
 		$newforum = get_forum($moveto);
 
 		$total_posts = $total_unapproved_posts = $total_threads = $total_unapproved_threads = 0;
-		$query = $db->simple_select("threads", "fid, visible, replies, unapprovedposts, tid", "tid IN ($tid_list)");
+		$query = $db->simple_select("threads", "fid, visible, replies, unapprovedposts, tid", "tid IN ($tid_list) AND closed NOT LIKE 'moved|%'");
 		while($thread = $db->fetch_array($query))
 		{
 			$forum = get_forum($thread['fid']);

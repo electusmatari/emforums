@@ -1524,7 +1524,7 @@ ul.thread_tools li.subscription_remove {
 					</table>
 					{$multipage}
 					<br />]]></template>
-		<template name="modcp_ipsearch_misc_info" version="1600"><![CDATA[<html>
+		<template name="modcp_ipsearch_misc_info" version="1614"><![CDATA[<html>
 <head>
 <title>{$lang->ipaddress_misc_info}</title>
 {$headerinclude}
@@ -1538,7 +1538,7 @@ body {
 	<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder">
 		<tr>
 			<td class="thead" align="center" colspan="2">
-				<div class="float_right" style="margin-top: 3px;"><span class="smalltext"><a href="#" onclick="window.close();">Close</a></span></div>
+				<div class="float_right" style="margin-top: 3px;"><span class="smalltext"><a href="#" onclick="window.close();">{$lang->close_window}</a></span></div>
 				<div><strong>{$lang->ipaddress_misc_info}</strong></div>
 			</td>
 		</tr>
@@ -1602,7 +1602,7 @@ body {
 		<template name="showthread_moderationoptions_custom_tool" version="120"><![CDATA[<option value="{$tool['tid']}">{$tool['name']}</option>]]></template>
 		<template name="showthread_inlinemoderation_custom" version="120"><![CDATA[<optgroup label="{$lang->custom_mod_tools}">{$customposttools}</optgroup>]]></template>
 		<template name="showthread_inlinemoderation_custom_tool" version="120"><![CDATA[<option value="{$tool['tid']}">{$tool['name']}</option>]]></template>
-		<template name="showthread_inlinemoderation" version="1600"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1600"></script>
+		<template name="showthread_inlinemoderation" version="1614"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1614"></script>
 <form action="moderation.php" method="post" style="margin-top: 0; margin-bottom: 0;">
 <input type="hidden" name="my_post_key" value="{$mybb->post_code}" />
 <input type="hidden" name="tid" value="{$tid}" />
@@ -2385,7 +2385,7 @@ body {
 </form>]]></template>
 		<template name="forumdisplay_inlinemoderation_custom" version="120"><![CDATA[<optgroup label="{$lang->custom_mod_tools}">{$customthreadtools}</optgroup>]]></template>
 		<template name="forumdisplay_inlinemoderation_custom_tool" version="120"><![CDATA[<option value="{$tool['tid']}">{$tool['name']}</option>]]></template>
-		<template name="forumdisplay_inlinemoderation" version="1600"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1600"></script>
+		<template name="forumdisplay_inlinemoderation" version="1614"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1614"></script>
 		<form action="moderation.php" method="post">
 <input type="hidden" name="my_post_key" value="{$mybb->post_code}" />
 <input type="hidden" name="fid" value="{$fid}" />
@@ -3250,9 +3250,9 @@ body {
 {$similarthreadbits}
 </table>]]></template>
 		<template name="nav_sep" version="120"><![CDATA[ / ]]></template>
-		<template name="post_attachments_new" version="1604"><![CDATA[<tr>
+		<template name="post_attachments_new" version="1614"><![CDATA[<tr>
 <td class="trow1" width="1"><img src="{$theme['imgdir']}/paperclip.gif" alt="" /></td>
-<td class="trow1" style="white-space: nowrap"><strong>{$lang->new_attachment}</strong> <input type="file" name="attachment" size="30" class="fileupload" /></td><td class="trow1" align="center">{$attach_update_options} <input type="submit" class="button" name="newattachment" value="{$lang->add_attachment}"  tabindex="13" />
+<td class="trow1" style="white-space: nowrap"><strong>{$lang->new_attachment}</strong> <input type="file" name="attachment" size="30" class="fileupload" /></td><td class="trow1" align="center">{$attach_update_options} {$attach_add_options}
 </td>
 </tr>]]></template>
 		<template name="nav_sep_active" version="120"><![CDATA[ / ]]></template>
@@ -5287,17 +5287,17 @@ body {
 {$lang->num_options} <input type="text" class="textbox" name="numpolloptions" value="{$numpolloptions}" size="10" /> {$lang->max_options}</span>
 </td>
 </tr>]]></template>
-		<template name="modcp_reports_report" version="1607"><![CDATA[<tr>
+		<template name="modcp_reports_report" version="1613"><![CDATA[<tr>
 <td class="{$trow}" align="center"><label for="reports_{$report['rid']}"><a href="{$report['postlink']}#pid{$report['pid']}" target="_blank">{$report['pid']}</a></label></td>
 <td class="{$trow}" align="center"><a href="{$report['posterlink']}" target="_blank">{$report['postusername']}</a></td>
 <td class="{$trow}"><a href="{$report['threadlink']}" target="_blank">{$report['threadsubject']}</a></td>
 <td class="{$trow}" align="center"><a href="{$report['reporterlink']}" target="_blank">{$report['username']}</a></td>
 <td class="{$trow}">{$report['reason']}</td>
-<td class="{$trow}" align="center" style="white-space: nowrap"><span class="smalltext">{$reportdate}<br />{$reporttime}</small></td>
+<td class="{$trow}" align="center" style="white-space: nowrap"><span class="smalltext">{$reportdate}<br />{$reporttime}</span></td>
 <td class="{$trow}" align="center"><input type="checkbox" class="checkbox" name="reports[]" id="reports_{$report['rid']}" value="{$report['rid']}" /></td>
 </tr>]]></template>
-	<template name="modcp_reports_multipage" version="120"><![CDATA[<tr>
-<td class="tcat" colspan="6"><span class="smalltext"> {$multipage}</span></td>
+	<template name="modcp_reports_multipage" version="1613"><![CDATA[<tr>
+<td class="tcat" colspan="7"><span class="smalltext"> {$multipage}</span></td>
 </tr>]]></template>
 	<template name="modcp_allreports" version="120"><![CDATA[<html>
 <head>
@@ -5652,6 +5652,7 @@ body {
 		<template name="postbit_attachments_images" version="120"><![CDATA[<span class="smalltext"><strong>{$lang->postbit_attachments_images}</strong></span><br />
 {$post['imagelist']}
 <br />]]></template>
+		<template name="post_attachments_add" version="1614"><![CDATA[<input type="submit" class="button" name="newattachment" value="{$lang->add_attachment}" tabindex="13" />]]></template>
 		<template name="post_attachments_attachment_postinsert" version="1405"><![CDATA[<input type="button" class="button" name="insert" value="{$lang->insert_attachment_post}" onclick="clickableEditor.insertAttachment({$attachment['aid']});" />]]></template>
 		<template name="post_attachments_attachment_remove" version="1604"><![CDATA[<input type="submit" class="button" name="rem" value="{$lang->remove_attachment}" onclick="return Post.removeAttachment({$attachment['aid']});" />]]></template>
 		<template name="post_attachments_update" version="1604"><![CDATA[<input type="submit" class="button" name="updateattachment" value="{$lang->update_attachment}" tabindex="12" />]]></template>
@@ -6572,7 +6573,7 @@ body { font-family: Verdana, Arial, sans-serif; font-size: 13px; }
 </table>
 </body>
 </html>]]></template>
-		<template name="misc_smilies_popup_smilie" version="123"><![CDATA[<td class="{$class}" align="center"><img src="{$smilie['image']}" alt="{$smilie['find']}" title="{$smilie['find']}" onclick="insertSmilie('{$smilie['insert']}');" /></a></td>
+		<template name="misc_smilies_popup_smilie" version="1613"><![CDATA[<td class="{$class}" align="center"><img src="{$smilie['image']}" alt="{$smilie['find']}" title="{$smilie['find']}" onclick="insertSmilie('{$smilie['insert']}');" style="cursor: pointer" /></a></td>
 <td class="{$class}">{$smilie['find']}</td>]]></template>
 		<template name="showteam" version="120"><![CDATA[<html>
 <head>
@@ -8002,11 +8003,11 @@ body { font-family: Verdana, Arial, sans-serif; font-size: 13px; }
 	</ul>
 </div>
 <br />]]></template>
-		<template name="member_register" version="1605"><![CDATA[<html>
+		<template name="member_register" version="1614"><![CDATA[<html>
 <head>
 <title>{$mybb->settings['bbname']} - {$lang->registration}</title>
 {$headerinclude}
-<script type="text/javascript" src="jscripts/validator.js"></script>
+<script type="text/javascript" src="jscripts/validator.js?ver=1614"></script>
 </head>
 <body>
 {$header}
@@ -8068,8 +8069,8 @@ body { font-family: Verdana, Arial, sans-serif; font-size: 13px; }
 <td valign="top"><span class="smalltext"><label for="pmnotice">{$lang->pm_notice}</label></span></td>
 </tr>
 <tr>
-<td valign="top" width="1"><input type="checkbox" class="checkbox" name="emailpmnotify" id="emailpmnotify" value="1" {$emailpmnotifycheck} /></td>
-<td valign="top"><span class="smalltext"><label for="emailpmnotify">{$lang->email_notify_newpm}</label></span></td>
+<td valign="top" width="1"><input type="checkbox" class="checkbox" name="pmnotify" id="pmnotify" value="1" {$pmnotifycheck} /></td>
+<td valign="top"><span class="smalltext"><label for="pmnotify">{$lang->email_notify_newpm}</label></span></td>
 </tr>
 <tr>
 <td valign="top" width="1"><input type="checkbox" class="checkbox" name="invisible" id="invisible" value="1" {$invisiblecheck} /></td>
@@ -10113,9 +10114,6 @@ document.write('<br /><span class="smalltext"><a href="#" onclick="UserCP.openBu
 		<p>{$lang->coppa_agreement_3}</p>
 	</td>
 </tr>]]></template>
-		<template name="modcp_modqueue_noresults" version="1400"><![CDATA[<tr>
-	<td class="trow1" align="center" colspan="{$colspan}">{$lang->error_no_results}</td>
-</tr>]]></template>
 		<template name="modcp_modqueue_threads" version="1400"><![CDATA[<html>
 <head>
 <title>{$mybb->settings['bbname']} - {$lang->threads_awaiting_moderation}</title>
@@ -10288,8 +10286,8 @@ document.write('<br /><span class="smalltext"><a href="#" onclick="UserCP.openBu
 {$footer}
 </body>
 </html>]]></template>
-		<template name="modcp_modqueue_attachments_attachment" version="1400"><![CDATA[			<tr>
-				<td class="{$altbg}"><a href="attachment.php?aid={$attachment['aid']}" target="_blank">{$attachment['filename']}</a> ({$attachment['filesize']})<br /><small class="modqueue_meta">Post: <a href="{$link}">{$attachment['postsubject']}</a></small></td>
+		<template name="modcp_modqueue_attachments_attachment" version="1614"><![CDATA[			<tr>
+				<td class="{$altbg}"><a href="attachment.php?aid={$attachment['aid']}" target="_blank">{$attachment['filename']}</a> ({$attachment['filesize']})<br /><small class="modqueue_meta">{$lang->post}: <a href="{$link}">{$attachment['postsubject']}</a></small></td>
 				<td class="{$altbg}" align="center">{$profile_link}</td>
 				<td align="center" class="{$altbg}">{$attachdate}, {$attachtime}</td>
 				<td class="{$altbg}" align="center"><label class="label_radio_ignore"><input type="radio" class="radio radio_ignore" name="attachments[{$attachment['aid']}]" value="ignore" checked="checked" /> {$lang->ignore}</label></td>
@@ -10862,6 +10860,9 @@ document.write('<br /><span class="smalltext"><a href="#" onclick="UserCP.openBu
 <a href="{$post['link']}#pid{$post['pid']}" title="{$post['fullsubject']}"><strong>{$post['subject']}</strong></a>
 <br />{$post['date']} {$post['time']}<br />{$lang->by} {$post['profilelink']}</span>
 ]]></template>
+	<template name="modcp_nobanned" version="1613"><![CDATA[<tr>
+	<td class="trow1" align="center" colspan="4">{$lang->no_bans_ending}</td>
+</tr>]]></template>
 	<template name="modcp_warninglogs" version="1405"><![CDATA[<html>
 <head>
 <title>{$mybb->settings['bbname']} - {$lang->warning_logs}</title>
@@ -11237,7 +11238,7 @@ document.write('<br /><span class="smalltext"><a href="#" onclick="UserCP.openBu
 	<template name="search_results_inlinemodcol" version="1408"><![CDATA[<td class="tcat" align="center" width="1"><input type="checkbox" name="allbox" onclick="inlineModeration.checkAll(this)" /></td>]]></template>
 	<template name="search_results_posts_inlinemoderation_custom" version="120"><![CDATA[<optgroup label="{$lang->custom_mod_tools}">{$customposttools}</optgroup>]]></template>
 	<template name="search_results_posts_inlinemoderation_custom_tool" version="120"><![CDATA[<option value="{$tool['tid']}">{$tool['name']}</option>]]></template>
-	<template name="search_results_posts_inlinemoderation" version="1600"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1600"></script>
+	<template name="search_results_posts_inlinemoderation" version="1614"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1614"></script>
 <form action="moderation.php" method="post" style="margin-top: 0; margin-bottom: 0;">
 <input type="hidden" name="my_post_key" value="{$mybb->post_code}" />
 <input type="hidden" name="tid" value="0" />
@@ -11267,7 +11268,7 @@ document.write('<br /><span class="smalltext"><a href="#" onclick="UserCP.openBu
 </script><br />]]></template>
 		<template name="search_results_threads_inlinemoderation_custom" version="120"><![CDATA[<optgroup label="{$lang->custom_mod_tools}">{$customthreadtools}</optgroup>]]></template>
 		<template name="search_results_threads_inlinemoderation_custom_tool" version="120"><![CDATA[<option value="{$tool['tid']}">{$tool['name']}</option>]]></template>
-		<template name="search_results_threads_inlinemoderation" version="1600"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1600"></script>
+		<template name="search_results_threads_inlinemoderation" version="1614"><![CDATA[<script type="text/javascript" src="jscripts/inline_moderation.js?ver=1614"></script>
 		<form action="moderation.php" method="post">
 <input type="hidden" name="my_post_key" value="{$mybb->post_code}" />
 <input type="hidden" name="fid" value="0" />

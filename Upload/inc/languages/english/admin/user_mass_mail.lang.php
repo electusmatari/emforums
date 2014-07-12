@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: user_mass_mail.lang.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 $l['mass_mail'] = "Mass Mail";
@@ -62,6 +62,7 @@ $l['subject'] = "Subject";
 $l['message'] = "Message";
 $l['text_based'] = "Text Based";
 $l['preview'] = "Preview";
+$l['mass_mail_preview'] = "Mass Email Preview";
 $l['html_based'] = "HTML Based";
 $l['total_recipients'] = "Total Recipients";
 $l['change_recipient_conds'] = "Change recipient conditions";

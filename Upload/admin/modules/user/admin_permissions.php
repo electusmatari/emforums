@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: admin_permissions.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id$
  */
 
 // Disallow direct access to this file for security reasons
@@ -82,7 +82,8 @@ if($mybb->input['action'] == "delete")
 		// Log admin action
 		if($uid < 0)
 		{
-			$query = $db->simple_select("usergroups", "title", "gid='$gid'");
+			$gid = abs($uid);
+			$query = $db->simple_select("usergroups", "title", "gid='{$gid}'");
 			$group = $db->fetch_array($query);
 			log_admin_action($uid, $group['title']);
 			
@@ -161,7 +162,7 @@ if($mybb->input['action'] == "edit")
 		{
 			// Groups
 			$gid = abs($uid);
-			$query = $db->simple_select("usergroups", "title", "gid='$gid'");
+			$query = $db->simple_select("usergroups", "title", "gid='{$gid}'");
 			$group = $db->fetch_array($query);
 			log_admin_action($uid, $group['title']);
 		}
@@ -177,14 +178,30 @@ if($mybb->input['action'] == "edit")
 	
 	if($uid > 0)
 	{
-		$query = $db->query("
-			SELECT u.uid, u.username, g.cancp, g.gid
-			FROM ".TABLE_PREFIX."users u
-			LEFT JOIN ".TABLE_PREFIX."usergroups g ON (u.usergroup=g.gid)
-			WHERE u.uid='$uid'
-			AND g.cancp=1
-			LIMIT 1
-		");
+		switch($db->type)
+		{
+			case "pgsql":
+			case "sqlite":
+				$query = $db->query("
+					SELECT u.uid, u.username, g.cancp, g.gid
+					FROM ".TABLE_PREFIX."users u
+					LEFT JOIN ".TABLE_PREFIX."usergroups g ON (((','|| u.additionalgroups|| ',' LIKE '%,'|| g.gid|| ',%') OR u.usergroup = g.gid))
+					WHERE u.uid='$uid'
+					AND g.cancp=1
+					LIMIT 1
+				");
+				break;
+			default:
+			$query = $db->query("
+				SELECT u.uid, u.username, g.cancp, g.gid
+				FROM ".TABLE_PREFIX."users u
+				LEFT JOIN ".TABLE_PREFIX."usergroups g ON (((CONCAT(',', u.additionalgroups, ',') LIKE CONCAT('%,', g.gid, ',%')) OR u.usergroup = g.gid))
+				WHERE u.uid='$uid'
+				AND g.cancp=1
+				LIMIT 1
+			");
+		}
+
 		$admin = $db->fetch_array($query);
 		$permission_data = get_admin_permissions($uid, $admin['gid']);
 		$title = $admin['username'];

@@ -268,81 +268,139 @@ function clean_keywords_ft($keywords)
 	$keywords = str_replace("%", "\\%", $keywords);
 	$keywords = preg_replace("#\*{2,}#s", "*", $keywords);
 	$keywords = preg_replace("#([\[\]\|\.\,:])#s", " ", $keywords);
+	// Separate braces for further processing
+	$keywords = preg_replace("#((\+|-|<|>|~)?\(|\))#s", " $1 ", $keywords);
 	$keywords = preg_replace("#\s+#s", " ", $keywords);
 
-	$words = array();
+	$words = array(array());
 
-	if(my_strpos($keywords, "\"") !== false)
+	// Fulltext search syntax validation: http://dev.mysql.com/doc/refman/5.6/en/fulltext-boolean.html
+	// Search for phrases
+	$keywords = explode("\"", $keywords);
+	$boolean = array('+');
+	// Brace depth
+	$depth = 0;
+	$phrase_operator = '+';
+	foreach($keywords as $phrase)
 	{
-		$inquote = false;
-		$keywords = explode("\"", $keywords);
-		foreach($keywords as $phrase)
+		$phrase = trim($phrase);
+		if($phrase != '')
 		{
-			if($phrase != '')
+			if($inquote)
 			{
-				if($inquote)
+				if($phrase_operator)
 				{
-					$words[] = "\"".trim($phrase)."\"";
+					$boolean[$depth] = $phrase_operator;
 				}
-				else
+				// Phrases do not need further processing
+				$words[$depth][] = "{$boolean[$depth]}\"{$phrase}\"";
+				$boolean[$depth] = $phrase_operator = '+';
+			}
+			else
+			{
+				// Split words
+				$split_words = preg_split("#\s{1,}#", $phrase, -1);
+				if(!is_array($split_words))
 				{
-					$split_words = preg_split("#\s{1,}#", $phrase, -1);
-					if(!is_array($split_words))
+					continue;
+				}
+				if(!$inquote)
+				{
+					// Save possible operator in front of phrase
+					$last_char = substr($phrase, -1);
+					if($last_char == '+' || $last_char == '-' || $last_char == '<' || $last_char == '>' || $last_char == '~')
 					{
-						continue;
+						$phrase_operator = $last_char;
 					}
-					foreach($split_words as $word)
+				}
+				foreach($split_words as $word)
+				{
+					$word = trim($word);
+					if($word == "or")
 					{
-						if(!$word)
+						$boolean[$depth] = '';
+						// Remove "and" operator from previous element
+						$last = array_pop($words[$depth]);
+						if($last)
+						{
+							if(substr($last, 0, 1) == '+')
+							{
+								$last = substr($last, 1);
+							}
+							$words[$depth][] = $last;
+						}
+					}
+					elseif($word == "and")
+					{
+						$boolean[$depth] = "+";
+					}
+					elseif($word == "not")
+					{
+						$boolean[$depth] = "-";
+					}
+					// Closing braces
+					elseif($word == ")")
+					{
+						// Ignore when no brace was opened
+						if($depth > 0)
+						{
+							$words[$depth-1][] = $boolean[$depth-1].'('.implode(' ', $words[$depth]).')';
+							--$depth;
+						}
+					}
+					// Valid operators for opening braces
+					elseif($word == '+(' || $word == '-(' || $word == '<(' || $word == '>(' || $word == '~(' || $word == '(')
+					{
+						if(strlen($word) == 2)
+						{
+							$boolean[$depth] = substr($word, 0, 1);
+						}
+						$words[++$depth] = array();
+						$boolean[$depth] = '+';
+					}
+					else
+					{
+						$operator = substr($word, 0, 1);
+						switch($operator)
+						{
+							// Allowed operators
+							case '-':
+							case '+':
+							case '>':
+							case '<':
+							case '~':
+								$word = substr($word, 1);
+								break;
+							default:
+								$operator = $boolean[$depth];
+								break;
+						}
+						// Removed operators that are only allowed at the beginning
+						$word = preg_replace("#(-|\+|<|>|~|@)#s", '', $word);
+						// Removing wildcards at the beginning http://bugs.mysql.com/bug.php?id=72605
+						$word = preg_replace("#^\*#s", '', $word);
+						$word = $operator.$word;
+						if(strlen($word) <= 1)
 						{
 							continue;
 						}
-						$words[] = trim($word);
+						$words[$depth][] = $word;
+						$boolean[$depth] = '+';
 					}
 				}
 			}
-			$inquote = !$inquote;
 		}
+		$inquote = !$inquote;
 	}
-	else
-	{
-		$split_words = preg_split("#\s{1,}#", $keywords, -1);
-		if(!is_array($split_words))
-		{
-			continue;
-		}
-		foreach($split_words as $word)
-		{
-			if(!$word)
-			{
-				continue;
-			}
-			$words[] = trim($word);
-		}
 
-	}
-	$keywords = '';
-	foreach($words as $word)
+	// Close mismatching braces
+	while($depth > 0)
 	{
-		if($word == "or")
-		{
-			$boolean = '';
-		}
-		elseif($word == "and")
-		{
-			$boolean = "+";
-		}
-		elseif($word == "not")
-		{
-			$boolean = "-";
-		}
-		else
-		{
-			$keywords .= " ".$boolean.$word;
-			$boolean = '';
-		}
+		$words[$depth-1][] = $boolean[$depth-1].'('.implode(' ', $words[$depth]).')';
+		--$depth;
 	}
-	$keywords = "+".trim($keywords);
+
+	$keywords = implode(' ', $words[0]);
 	return $keywords;
 }
 
@@ -656,7 +714,7 @@ function perform_search_mysql($search)
 	{
 		// Complex search
 		$keywords = " {$keywords} ";
-		if(preg_match("# and|or #", $keywords))
+		if(preg_match("#\s(and|or)\s#", $keywords))
 		{
 			$subject_lookin = " AND (";
 			$message_lookin = " AND (";
@@ -664,6 +722,7 @@ function perform_search_mysql($search)
 			// Expand the string by double quotes
 			$keywords_exp = explode("\"", $keywords);
 			$inquote = false;
+			$boolean = '';
 
 			foreach($keywords_exp as $phrase)
 			{
@@ -707,6 +766,7 @@ function perform_search_mysql($search)
 							{
 								$message_lookin .= " $boolean LOWER(p.message) LIKE '%{$word}%'";
 							}
+							$boolean = 'AND';
 						}
 					}
 				}
@@ -725,6 +785,7 @@ function perform_search_mysql($search)
 					{
 						$message_lookin .= " $boolean LOWER(p.message) LIKE '%{$phrase}%'";
 					}
+					$boolean = 'AND';
 				}
 
 				if($subject_lookin == " AND (")
@@ -815,9 +876,25 @@ function perform_search_mysql($search)
 	}
 
 	$thread_prefixcut = '';
-	if($search['threadprefix'] && $search['threadprefix'] != 'any')
+	$prefixlist = array();
+	if($search['threadprefix'] && $search['threadprefix'][0] != 'any')
 	{
-		$thread_prefixcut = " AND t.prefix='".intval($search['threadprefix'])."'";
+		foreach($search['threadprefix'] as $threadprefix)
+		{
+			$threadprefix = intval($threadprefix);
+			$prefixlist[] = $threadprefix;
+		}
+	}
+	if(count($prefixlist) == 1)
+	{
+		$thread_prefixcut .= " AND t.prefix='$threadprefix' ";
+	}
+	else
+	{
+		if(count($prefixlist) > 1)
+		{
+			$thread_prefixcut = " AND t.prefix IN (".implode(',', $prefixlist).")";
+		}
 	}
 
 	$forumin = '';
@@ -1192,9 +1269,25 @@ function perform_search_mysql_ft($search)
 	}
 
 	$thread_prefixcut = '';
-	if($search['threadprefix'] && $search['threadprefix'] != 'any')
+	$prefixlist = array();
+	if($search['threadprefix'] && $search['threadprefix'][0] != 'any')
 	{
-		$thread_prefixcut = " AND t.prefix='".intval($search['threadprefix'])."'";
+		foreach($search['threadprefix'] as $threadprefix)
+		{
+			$threadprefix = intval($threadprefix);
+			$prefixlist[] = $threadprefix;
+		}
+	}
+	if(count($prefixlist) == 1)
+	{
+		$thread_prefixcut .= " AND t.prefix='$threadprefix' ";
+	}
+	else
+	{
+		if(count($prefixlist) > 1)
+		{
+			$thread_prefixcut = " AND t.prefix IN (".implode(',', $prefixlist).")";
+		}
 	}
 
 	$forumin = '';
@@ -1225,7 +1318,7 @@ function perform_search_mysql_ft($search)
 							SELECT f.fid
 							FROM ".TABLE_PREFIX."forums f
 							LEFT JOIN ".TABLE_PREFIX."forumpermissions p ON (f.fid=p.fid AND p.gid IN (".$user_groups."))
-							WHERE INSTR(','||parentlist||',',',$forum,') > 0 AND active!=0 AND (ISNULL(p.fid) OR p.cansearch=1)
+							WHERE INSTR(','||parentlist||',',',$forum,') > 0 AND active!=0 AND ((p.fid) IS NULL OR p.cansearch=1)
 						");
 						break;
 					default:
@@ -1233,7 +1326,7 @@ function perform_search_mysql_ft($search)
 							SELECT f.fid
 							FROM ".TABLE_PREFIX."forums f
 							LEFT JOIN ".TABLE_PREFIX."forumpermissions p ON (f.fid=p.fid AND p.gid IN (".$user_groups."))
-							WHERE INSTR(CONCAT(',',parentlist,','),',$forum,') > 0 AND active!=0 AND (ISNULL(p.fid) OR p.cansearch=1)
+							WHERE INSTR(CONCAT(',',parentlist,','),',$forum,') > 0 AND active!=0 AND ((p.fid) IS NULL OR p.cansearch=1)
 						");
 				}
 				while($sforum = $db->fetch_array($query))

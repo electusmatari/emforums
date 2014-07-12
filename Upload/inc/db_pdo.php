@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: db_pdo.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 class dbpdoEngine {
@@ -126,7 +126,16 @@ class dbpdoEngine {
 			return;
 		}
 		
-		return count($query->rowCount());
+		if(is_numeric(stripos($query->queryString, 'SELECT')))
+		{
+			$query = $this->db->query($query->queryString);
+			$result = $query->fetchAll();
+			return count($result);
+		}
+		else
+		{
+			return $query->rowCount();
+		}
 	}
 	
 	/**

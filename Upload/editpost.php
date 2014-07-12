@@ -173,14 +173,14 @@ if(!$mybb->input['attachmentaid'] && ($mybb->input['newattachment'] || $mybb->in
 	// Verify incoming POST request
 	verify_post_check($mybb->input['my_post_key']);
 
-	$query = $db->simple_select("attachments", "COUNT(aid) as numattachs", "pid='{$pid}'");
-	$attachcount = $db->fetch_field($query, "numattachs");
-
 	// If there's an attachment, check it and upload it
-	if($_FILES['attachment']['size'] > 0 && $forumpermissions['canpostattachments'] != 0 && ($mybb->settings['maxattachments'] == 0 || $attachcount < $mybb->settings['maxattachments']))
+	if($_FILES['attachment']['size'] > 0 && $forumpermissions['canpostattachments'] != 0)
 	{
+		$query = $db->simple_select("attachments", "aid", "filename='".$db->escape_string($_FILES['attachment']['name'])."' AND pid='{$pid}'");
+		$updateattach = $db->fetch_field($query, "aid");
+
 		$update_attachment = false;
-		if($mybb->input['updateattachment'] && ($mybb->usergroup['caneditattachments'] || $forumpermissions['caneditattachments']))
+		if($updateattach > 0 && $mybb->input['updateattachment'] && ($mybb->usergroup['caneditattachments'] || $forumpermissions['caneditattachments']))
 		{
 			$update_attachment = true;
 		}
@@ -456,13 +456,19 @@ if(!$mybb->input['action'] || $mybb->input['action'] == "editpost")
 		$lang->attach_quota = $lang->sprintf($lang->attach_quota, $friendlyusage, $friendlyquota);
 		if($mybb->settings['maxattachments'] == 0 || ($mybb->settings['maxattachments'] != 0 && $attachcount < $mybb->settings['maxattachments']) && !$noshowattach)
 		{
-			if($mybb->usergroup['caneditattachments'] || $forumpermissions['caneditattachments'])
-			{
-				eval("\$attach_update_options = \"".$templates->get("post_attachments_update")."\";");
-			}
+			eval("\$attach_add_options = \"".$templates->get("post_attachments_add")."\";");
+		}
 
+		if($mybb->usergroup['caneditattachments'] || $forumpermissions['caneditattachments'])
+		{
+			eval("\$attach_update_options = \"".$templates->get("post_attachments_update")."\";");
+		}
+
+		if($attach_add_options || $attach_update_options)
+		{
 			eval("\$newattach = \"".$templates->get("post_attachments_new")."\";");
 		}
+
 		eval("\$attachbox = \"".$templates->get("post_attachments")."\";");
 	}
 	if(!$mybb->input['attachmentaid'] && !$mybb->input['newattachment'] && !$mybb->input['updateattachment'] && !$mybb->input['previewpost'] && !$maximageserror)
@@ -553,16 +559,25 @@ if(!$mybb->input['action'] || $mybb->input['action'] == "editpost")
 
 	if($mybb->input['previewpost'])
 	{
-		// Figure out the poster's other information.
-		$query = $db->query("
-			SELECT u.*, f.*, p.dateline
-			FROM ".TABLE_PREFIX."users u
-			LEFT JOIN ".TABLE_PREFIX."userfields f ON (f.ufid=u.uid)
-			LEFT JOIN ".TABLE_PREFIX."posts p ON (p.uid=u.uid)
-			WHERE u.uid='{$post['uid']}' AND p.pid='{$pid}'
-			LIMIT 1
-		");
-		$postinfo = $db->fetch_array($query);
+		if(!$post['uid'])
+		{
+			$query = $db->simple_select('posts', 'username', "pid='{$pid}'");
+			$postinfo['username'] = $db->fetch_field($query, 'username');
+		}
+		else
+		{
+			// Figure out the poster's other information.
+			$query = $db->query("
+				SELECT u.*, f.*, p.dateline
+				FROM ".TABLE_PREFIX."users u
+				LEFT JOIN ".TABLE_PREFIX."userfields f ON (f.ufid=u.uid)
+				LEFT JOIN ".TABLE_PREFIX."posts p ON (p.uid=u.uid)
+				WHERE u.uid='{$post['uid']}' AND p.pid='{$pid}'
+				LIMIT 1
+			");
+			$postinfo = $db->fetch_array($query);
+			$postinfo['userusername'] = $postinfo['username'];
+		}
 
 		$query = $db->simple_select("attachments", "*", "pid='{$pid}'");
 		while($attachment = $db->fetch_array($query))
@@ -571,7 +586,6 @@ if(!$mybb->input['action'] || $mybb->input['action'] == "editpost")
 		}
 
 		// Set the values of the post info array.
-		$postinfo['userusername'] = $postinfo['username'];
 		$postinfo['message'] = $previewmessage;
 		$postinfo['subject'] = $previewsubject;
 		$postinfo['icon'] = $icon;

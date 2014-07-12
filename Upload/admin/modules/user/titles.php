@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: titles.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 // Disallow direct access to this file for security reasons
@@ -47,6 +47,12 @@ if($mybb->input['action'] == "add")
 		if(!isset($mybb->input['posts']))
 		{
 			$errors[] = $lang->error_missing_posts;
+		}
+
+		$query = $db->simple_select("usertitles", "utid", "posts= '".intval($mybb->input['posts'])."'");
+		if($db->num_rows($query))
+		{
+			$errors[] = $lang->error_cannot_have_same_posts;
 		}
 
 		if(!$errors)
@@ -129,6 +135,12 @@ if($mybb->input['action'] == "edit")
 		if(!isset($mybb->input['posts']))
 		{
 			$errors[] = $lang->error_missing_posts;
+		}
+
+		$query = $db->simple_select("usertitles", "utid", "posts= '".intval($mybb->input['posts'])."' AND utid!= '".intval($mybb->input['utid'])."'");
+		if($db->num_rows($query))
+		{
+			$errors[] = $lang->error_cannot_have_same_posts;
 		}
 
 		if(!$errors)
@@ -217,6 +229,8 @@ if($mybb->input['action'] == "delete")
 		
 		$plugins->run_hooks("admin_user_titles_delete_commit");
 
+		$cache->update_usertitles();
+		
 		// Log admin action
 		log_admin_action($usertitle['utid'], $usertitle['title'], $usertitle['posts']);
 

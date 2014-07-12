@@ -441,6 +441,18 @@ function upload_attachment($attachment, $update_attachment=false)
 		return $ret;
 	}
 
+	// Check to see how many attachments exist for this post already
+	if($mybb->settings['maxattachments'] > 0 && $update_attachment == false)
+	{
+		$query = $db->simple_select("attachments", "COUNT(aid) AS numattachs", $uploaded_query);
+		$attachcount = $db->fetch_field($query, "numattachs");
+		if($attachcount >= $mybb->settings['maxattachments'])
+		{
+			$ret['error'] = $lang->sprintf($lang->error_maxattachpost, $mybb->settings['maxattachments']);
+			return $ret;
+		}
+	}
+
 	$month_dir = '';
 	if(ini_get('safe_mode') != 1 && strtolower(ini_get('safe_mode')) != 'on')
 	{
@@ -591,6 +603,25 @@ function upload_attachment($attachment, $update_attachment=false)
 	{
 		unset($attacharray['downloads']); // Keep our download count if we're updating an attachment
 		$db->update_query("attachments", $attacharray, "aid='".$db->escape_string($prevattach['aid'])."'");
+
+		// Remove old attachment file
+		// Check if this attachment is referenced in any other posts. If it isn't, then we are safe to delete the actual file.
+		$query = $db->simple_select("attachments", "COUNT(aid) as numreferences", "attachname='".$db->escape_string($prevattach['attachname'])."'");
+		if($db->fetch_field($query, "numreferences") == 0)
+		{
+			@unlink($mybb->settings['uploadspath']."/".$prevattach['attachname']);
+			if($prevattach['thumbnail'])
+			{
+				@unlink($mybb->settings['uploadspath']."/".$prevattach['thumbnail']);
+			}
+
+			$date_directory = explode('/', $prevattach['attachname']);
+			if(@is_dir($mybb->settings['uploadspath']."/".$date_directory[0]))
+			{
+				@rmdir($mybb->settings['uploadspath']."/".$date_directory[0]);
+			}
+		}
+
 		$aid = $prevattach['aid'];
 	}
 	else

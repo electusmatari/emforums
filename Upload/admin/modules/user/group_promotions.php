@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: group_promotions.php 5832 2012-05-24 08:08:19Z Tomm $
+ * $Id$
  */
 
 // Disallow direct access to this file for security reasons
@@ -63,11 +63,11 @@ if($mybb->input['action'] == "disable")
 
 	if($mybb->request_method == "post")
 	{
-		$promotion = array(
+		$update_promotion = array(
 			"enabled" => 0
 		);
 
-		$db->update_query("promotions", $promotion, "pid = '{$mybb->input['pid']}'");
+		$db->update_query("promotions", $update_promotion, "pid = '{$mybb->input['pid']}'");
 
 		$plugins->run_hooks("admin_user_group_promotions_disable_commit");
 
@@ -150,11 +150,11 @@ if($mybb->input['action'] == "enable")
 		admin_redirect("index.php?module=user-group_promotions");
 	}
 
-	$promotion = array(
+	$update_promotion = array(
 		"enabled" => 1
 	);
 	
-	$db->update_query("promotions", $promotion, "pid = '{$mybb->input['pid']}'");
+	$db->update_query("promotions", $update_promotion, "pid = '{$mybb->input['pid']}'");
 	
 	$plugins->run_hooks("admin_user_group_promotions_enable_commit");
 

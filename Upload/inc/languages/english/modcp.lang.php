@@ -187,6 +187,8 @@ $l['edited_user_info'] = "<strong>User:</strong> <a href=\"{2}\">{1}</a>";
 $l['edited_user_ban'] = "Edited User Ban";
 $l['banned_user'] = "Banned User";
 $l['lifted_ban'] = "Lifted User Ban";
+$l['no_bans_ending'] = "There are no bans ending soon.";
+$l['close_window'] = "Close Window";
 
 $l['warning_logs'] = "Warning Logs";
 $l['warned_user'] = "Warned User";
@@ -279,4 +281,9 @@ $l['error_invalid_start_date'] = "The starting date for the announcement is inva
 $l['error_invalid_end_date'] = "The ending date for the announcement is invalid.";
 $l['error_end_before_start'] = "The ending date must be after the start date.";
 $l['error_invalid_announcement'] = "The specified announcement is invalid.";
+$l['announcement_added'] = "Announcement Added";
+$l['announcement_edited'] = "Announcement Edited";
+$l['announcement_deleted'] = "Announcement Deleted";
+
+$l['post'] = 'Post';
 ?>

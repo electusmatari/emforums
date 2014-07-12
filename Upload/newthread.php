@@ -14,7 +14,7 @@ define('THIS_SCRIPT', 'newthread.php');
 
 $templatelist = "newthread,previewpost,loginbox,changeuserbox,newthread_postpoll,posticons,codebuttons,smilieinsert,newthread_multiquote_external,post_attachments_attachment_unapproved";
 $templatelist .= ",newthread_disablesmilies,newreply_modoptions,post_attachments_new,post_attachments,post_savedraftbutton,post_subscription_method,post_attachments_attachment_remove";
-$templatelist .= ",forumdisplay_rules,forumdisplay_rules_link,post_attachments_attachment_postinsert,post_attachments_attachment,newthread_options_signature";
+$templatelist .= ",forumdisplay_rules,forumdisplay_rules_link,post_attachments_attachment_postinsert,post_attachments_attachment,post_attachments_add,newthread_options_signature";
 $templatelist .= ",member_register_regimage,member_register_regimage_recaptcha,post_captcha_hidden,post_captcha,post_captcha_recaptcha,postbit_groupimage,postbit_online,postbit_away,postbit_offline";
 $templatelist .= ",postbit_avatar,postbit_find,postbit_pm,postbit_rep_button,postbit_www,postbit_email,postbit_reputation,postbit_warn,postbit_warninglevel,postbit_author_user,postbit_author_guest";
 $templatelist .= ",postbit_signature,postbit_classic,postbit,postbit_attachments_thumbnails_thumbnail,postbit_attachments_images_image,postbit_attachments_attachment,postbit_attachments_attachment_unapproved";
@@ -434,8 +434,13 @@ if($mybb->input['action'] == "do_newthread" && $mybb->request_method == "post")
 
 if($mybb->input['action'] == "newthread" || $mybb->input['action'] == "editdraft")
 {
-
 	$plugins->run_hooks("newthread_start");
+
+	// Do we have attachment errors?
+	if(count($errors) > 0)
+	{
+		$thread_errors = inline_error($errors);
+	}
 
 	// If this isn't a preview and we're not editing a draft, then handle quoted posts
 	if(!$mybb->input['previewpost'] && !$thread_errors && $mybb->input['action'] != "editdraft")
@@ -730,12 +735,6 @@ if($mybb->input['action'] == "newthread" || $mybb->input['action'] == "editdraft
 		$subject = htmlspecialchars_uni($mybb->input['subject']);
 	}
 
-	// Do we have attachment errors?
-	if(count($errors) > 0)
-	{
-		$thread_errors = inline_error($errors);
-	}
-
 	// Generate thread prefix selector
 	if(!intval($mybb->input['threadprefix']))
 	{
@@ -845,6 +844,7 @@ if($mybb->input['action'] == "newthread" || $mybb->input['action'] == "editdraft
 		$lang->attach_quota = $lang->sprintf($lang->attach_quota, $friendlyusage, $friendlyquota);
 		if($mybb->settings['maxattachments'] == 0 || ($mybb->settings['maxattachments'] != 0 && $attachcount < $mybb->settings['maxattachments']) && !$noshowattach)
 		{
+			eval("\$attach_add_options = \"".$templates->get("post_attachments_add")."\";");
 			eval("\$newattach = \"".$templates->get("post_attachments_new")."\";");
 		}
 		eval("\$attachbox = \"".$templates->get("post_attachments")."\";");

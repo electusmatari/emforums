@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: forum_management.lang.php 5828 2012-05-08 16:06:16Z Tomm $
+ * $Id$
  */
 
 $l['forum_management'] = "Forum Management";
@@ -213,6 +213,7 @@ $l['save_permissions'] = "Save Forum Permissions";
 $l['error_missing_title'] = "You must enter in a title.";
 $l['error_no_parent'] = "You must select a parent forum.";
 $l['error_not_empty'] = "Forums with threads cannot be converted to categories.";
+$l['error_forum_link_not_empty'] = "Forums with threads cannot be redirected to another webpage.";
 
 $l['success_forum_added'] = "The forum has been created successfully.";
 $l['success_moderator_added'] = "The moderator has been added to this forum successfully.";

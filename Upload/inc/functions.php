@@ -21,6 +21,7 @@ function output_page($contents)
 
 	$contents = parse_page($contents);
 	$totaltime = $maintimer->stop();
+	$contents = $plugins->run_hooks("pre_output_page", $contents);
 
 	if($mybb->usergroup['cancp'] == 1)
 	{
@@ -92,7 +93,6 @@ function output_page($contents)
 	}
 
 	$contents = str_replace("<debugstuff>", "", $contents);
-	$contents = $plugins->run_hooks("pre_output_page", $contents);
 
 	if($mybb->settings['gzipoutput'] == 1)
 	{
@@ -1466,9 +1466,9 @@ function get_moderator_permissions($fid, $uid="0", $parentslist="")
 
 	$mod_cache = $cache->read("moderators");
 
-	foreach($mod_cache as $fid => $forum)
+	foreach($mod_cache as $forumid => $forum)
 	{
-		if(!is_array($forum) || !in_array($fid, $parentslist))
+		if(!is_array($forum) || !in_array($forumid, $parentslist))
 		{
 			// No perms or we're not after this forum
 			continue;
@@ -1549,6 +1549,15 @@ function is_moderator($fid="0", $action="", $uid="0")
 	$user_perms = user_permissions($uid);
 	if($user_perms['issupermod'] == 1)
 	{
+		if($fid)
+		{
+			$forumpermissions = forum_permissions($fid);
+			if($forumpermissions['canview'] && $forumpermissions['canviewthreads'] && !$forumpermissions['canonlyviewownthreads'])
+			{
+				return true;
+			}
+			return false;
+		}
 		return true;
 	}
 	else
@@ -2761,13 +2770,14 @@ function build_prefix_select($fid, $selected_pid=0, $multiple=0)
 	}
 
 	$prefixselect = "";
-	$multipleselect = "";
 	if($multiple != 0)
 	{
-		$multipleselect = " multiple=\"multiple\" size=\"5\"";
+		$prefixselect = "<select name=\"threadprefix[]\" multiple=\"multiple\" size=\"5\">\n";
 	}
-
-	$prefixselect = "<select name=\"threadprefix\"{$multipleselect}>\n";
+	else
+	{
+		$prefixselect = "<select name=\"threadprefix\">\n";
+	}
 
 	if($multiple == 1)
 	{
@@ -2987,7 +2997,7 @@ function get_ip()
 
 	$ip = 0;
 
-	if(!preg_match("#^(10|172\.16|192\.168)\.#", $_SERVER['REMOTE_ADDR']))
+	if(!preg_match("#^(10|172\.(1[6-9]|2[0-9]|3[0-1])|192\.168)\.#", $_SERVER['REMOTE_ADDR']))
 	{
 		$ip = $_SERVER['REMOTE_ADDR'];
 	}
@@ -3007,7 +3017,7 @@ function get_ip()
 		{
 			foreach($addresses[0] as $key => $val)
 			{
-				if(!preg_match("#^(10|172\.16|192\.168)\.#", $val))
+				if(!preg_match("#^(10|172\.(1[6-9]|2[0-9]|3[0-1])|192\.168)\.#", $val))
 				{
 					$ip = $val;
 					break;
@@ -5731,10 +5741,15 @@ function fetch_remote_file($url, $post_data=array())
  */
 function is_super_admin($uid)
 {
-	global $mybb;
+	static $super_admins;
 
-	$mybb->config['super_admins'] = str_replace(" ", "", $mybb->config['super_admins']);
-	if(my_strpos(",{$mybb->config['super_admins']},", ",{$uid},") === false)
+	if(!isset($super_admins))
+	{
+		global $mybb;
+		$super_admins = str_replace(" ", "", $mybb->config['super_admins']);
+	}
+
+	if(my_strpos(",{$super_admins},", ",{$uid},") === false)
 	{
 		return false;
 	}
@@ -5742,6 +5757,43 @@ function is_super_admin($uid)
 	{
 		return true;
 	}
+}
+
+/**
+ * Prevents super administrators being selected in a SELECT.
+ *
+ * @param boolean Prefix with an AND?
+ * @param string The prefix to add to uid when used in a JOIN (e.g. SELECTing users u would mean using 'u' in this argument).
+ * @return string An addition to the WHERE statement
+ */
+function not_super_admins($use_and = false, $uid_prefix = '')
+{
+	static $super_admins;
+
+	if(!isset($super_admins))
+	{
+		global $mybb, $db;
+		$super_admins = $db->escape_string(str_replace(" ", "", $mybb->config['super_admins']));
+	}
+
+	if($super_admins)
+	{
+		$sql_where = '';
+		if($use_and)
+		{
+			$sql_where .= ' AND ';
+		}
+
+		if($uid_prefix != '')
+		{
+			$sql_where .= $uid_prefix.'.';
+		}
+
+		$sql_where .= "uid NOT IN({$super_admins})";
+
+		return $sql_where;
+	}
+	return '';
 }
 
 /**
@@ -6209,12 +6261,54 @@ function signed($int)
 function secure_seed_rng($count=8)
 {
 	$output = '';
-
-	// Try the unix/linux method
-	if(@is_readable('/dev/urandom') && ($handle = @fopen('/dev/urandom', 'rb')))
+	// DIRECTORY_SEPARATOR checks if running windows
+	if(DIRECTORY_SEPARATOR != '\\')
 	{
-		$output = @fread($handle, $count);
-		@fclose($handle);
+		// Unix/Linux
+		// Use OpenSSL when available
+		if(function_exists('openssl_random_pseudo_bytes'))
+		{
+			$output = openssl_random_pseudo_bytes($count);
+		}
+		// Try mcrypt
+		elseif(function_exists('mcrypt_create_iv'))
+		{
+			$output = mcrypt_create_iv($count, MCRYPT_DEV_URANDOM);
+		}
+		// Try /dev/urandom
+		elseif(@is_readable('/dev/urandom') && ($handle = @fopen('/dev/urandom', 'rb')))
+		{
+			$output = @fread($handle, $count);
+			@fclose($handle);
+		}
+	}
+	else
+	{
+		// Windows
+		// Use OpenSSL when available
+		// PHP <5.3.4 had a bug which makes that function unusable on Windows
+		if(function_exists('openssl_random_pseudo_bytes') && version_compare(PHP_VERSION, '5.3.4', '>='))
+		{
+			$output = openssl_random_pseudo_bytes($count);
+		}
+		// Try mcrypt
+		elseif(function_exists('mcrypt_create_iv'))
+		{
+			$output = mcrypt_create_iv($count, MCRYPT_RAND);
+		}
+		// Try Windows CAPICOM before using our own generator
+		elseif(class_exists('COM'))
+		{
+			try
+			{
+				$CAPI_Util = new COM('CAPICOM.Utilities.1');
+				if(is_callable(array($CAPI_Util, 'GetRandom')))
+				{
+					$output = $CAPI_Util->GetRandom($count, 0);
+				}
+			} catch (Exception $e) {
+			}
+		}
 	}
 
 	// Didn't work? Do we still not have enough bytes? Use our own (less secure) rng generator
